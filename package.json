@@ -1,0 +1,42 @@
+{
+  "name": "create-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/src/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "ts-node src/index.ts",
+    "save": "pnpm build && pnpm link --global ."
+  },
+  "bin": {
+    "create-project": "./dist/src/index.js"
+  },
+  "keywords": [],
+  "author": "Rui Valim",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.31",
+    "@types/prompts": "^2.0.14",
+    "@types/signale": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.22.0",
+    "@typescript-eslint/parser": "^5.22.0",
+    "eslint": "^8.15.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^2.7.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "parcel": "^2.5.0",
+    "prettier": "^2.6.2",
+    "ts-node": "^10.7.0",
+    "ts-node-dev": "^1.1.8",
+    "tsconfig-paths": "^4.0.0",
+    "tscpaths": "^0.0.9",
+    "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "create-project": "^1.0.0",
+    "prompts": "^2.4.2",
+    "signale": "^1.4.0"
+  }
+}
