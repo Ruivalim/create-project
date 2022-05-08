@@ -1,3 +1,5 @@
+import { safe, camelCase, capitalize } from './functions';
+
 export const editorConfig = `root = true
 
 [*]
@@ -22,7 +24,6 @@ export const eslintignore = `.idea/
 .history/
 target/
 node_modules/
-app/templates/assets/js/qrcode.js
 `;
 
 export const eslintrc = JSON.stringify(
@@ -83,14 +84,17 @@ export const eslintrc = JSON.stringify(
 
 export const gitignore = `node_modules
 dist
+.DS_Store
+.cdk.staging
+cdk.out
 `;
 
-export const prettier = `export const singleQuote: boolean;
-export export const trailingComma: string;
-export export const arrowParens: string;
-export export const printWidth: number;
-export export const useTabs: boolean;
-export export const tabWidth: number;
+export const prettier = `module.exports = {
+    singleQuote: true,
+    trailingComma: 'all',
+    arrowParens: 'avoid',
+    printWidth: 160
+}
 `;
 
 export const tsconfig = JSON.stringify(
@@ -133,17 +137,53 @@ export const tsconfig = JSON.stringify(
 	'\t',
 );
 
-export const indexHtml = `<html lang="en">
-
+export const indexHtml = (projectName: string) => `<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${projectName}</title>
 </head>
-
 <body>
-    <script type="module" src="index.ts"></script>
+	<script type="module" src="index.ts"></script>
 </body>
-
 </html>
+`;
+
+export const cdkJson = (projectName: string) => `{
+    "app": "npx ts-node --prefer-ts-exts bin/${safe(projectName)}.ts",
+    "context": {
+        "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": false,
+        "@aws-cdk/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": true,
+        "@aws-cdk/aws-rds:lowercaseDbIdentifier": false,
+        "@aws-cdk/core:stackRelativeExports": false
+    }
+}
+`;
+
+export const cdkBin = (projectName: string) => `#!/usr/bin/env node
+import { App } from 'aws-cdk-lib';
+import 'source-map-support/register';
+import ${capitalize(camelCase(projectName))} from '../lib/main';
+
+const app = new App();
+
+new ${capitalize(camelCase(projectName))}(app, '${capitalize(camelCase(projectName))}', {
+	env: {
+		region: process.env.CDK_DEFAULT_REGION,
+		account: process.env.CDK_DEFAULT_ACCOUNT,
+	},
+});
+`;
+
+export const cdkLib = (projectName: string) => `import { Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+
+export default class ${capitalize(camelCase(projectName))} extends Stack {
+	constructor(scope: Construct, id: string, props: StackProps) {
+		super(scope, id, props);
+
+	}
+}
 `;

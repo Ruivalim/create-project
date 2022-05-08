@@ -2,7 +2,7 @@
 
 import prompts from 'prompts';
 import fs from 'fs';
-import { createDir, createFiles, initProject, installDependencies } from './functions';
+import { createDir, createFiles, initProject, installDependencies, postInstall } from './functions';
 
 (async () => {
 	const response = await prompts([
@@ -20,6 +20,7 @@ import { createDir, createFiles, initProject, installDependencies } from './func
 				{ title: 'Basic', description: 'Only basic typescript configuration', value: 'basic' },
 				{ title: 'WebProject', description: 'Basic typescript configuration with extra libs for web development', value: 'web' },
 				{ title: 'CLI', description: 'Basic typescript configuration with extra libs for CLI application', value: 'cli' },
+				{ title: 'CDK', description: 'Basic typescript configuration with extra libs for CDK', value: 'cdk' },
 			],
 		},
 		{
@@ -41,4 +42,6 @@ import { createDir, createFiles, initProject, installDependencies } from './func
 	installDependencies(response.projectName, response.projectType, response.packageManager as packageManager);
 
 	createFiles(response.projectName, response.projectType);
+
+	postInstall(response.projectName);
 })();
