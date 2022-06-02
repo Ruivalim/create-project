@@ -1,8 +1,9 @@
 import { Signale } from 'signale';
 import fs from 'fs';
 import { execSync } from 'child_process';
+import path from 'path';
+import { exit } from 'process';
 import { dependenciesList, devDependenciesList } from './dependencies';
-import { editorConfig, eslintignore, eslintrc, gitignore, prettier, tsconfig, indexHtml, cdkJson, cdkBin, cdkLib } from './files';
 
 const install = (packageManager: packageManager, type: projectType, dev: boolean) => {
 	const command = packageManager === 'yarn' ? 'add' : 'install';
@@ -59,36 +60,45 @@ export const installDependencies = (projectName: string, projectType: projectTyp
 	dependenciesSignale.success('Dependencies installed successfully \n');
 };
 
-export const createFiles = (projectName: string, projectType: projectType) => {
+const samplesWalker = (dir: string, projectName: string) => {
+	const folder = fs.readdirSync(dir);
+	folder.forEach(item => {
+		const itemPath = path.join(dir, item);
+		const stat = fs.statSync(itemPath);
+		if (stat.isDirectory()) {
+			samplesWalker(itemPath, projectName);
+		} else {
+			const fileData = fs
+				.readFileSync(itemPath, 'utf-8')
+				.replace(/nosafeprojectName/g, projectName)
+				.replace(/safeprojectName/g, safe(projectName))
+				.replace(/capitalizecamelCaseprojectName/g, capitalize(camelCase(projectName)));
+
+			const copyTo = path.join(process.cwd(), projectName, itemPath.replace(path.join(__dirname, '..'), '').split('/').splice(3).join('/'));
+
+			const fullDirPath = copyTo
+				.split('/')
+				.splice(0, copyTo.split('/').length - 1)
+				.join('/');
+
+			if (!fs.existsSync(fullDirPath)) {
+				fs.mkdirSync(fullDirPath, { recursive: true });
+			}
+
+			fs.writeFileSync(copyTo.replace('projectName', safe(projectName)), fileData);
+		}
+	});
+};
+
+export const moveSamples = (projectName: string, projectType: projectType) => {
 	const filesSignale = new Signale({ interactive: true });
 	filesSignale.pending('Creating files');
 
-	fs.writeFileSync(`${safe(projectName)}/.editorconfig`, editorConfig, { encoding: 'utf-8' });
-	fs.writeFileSync(`${safe(projectName)}/.eslintignore`, eslintignore, { encoding: 'utf-8' });
-	fs.writeFileSync(`${safe(projectName)}/.eslintrc`, eslintrc, { encoding: 'utf-8' });
-	fs.writeFileSync(`${safe(projectName)}/.gitignore`, gitignore, { encoding: 'utf-8' });
-	fs.writeFileSync(`${safe(projectName)}/prettier.config.js`, prettier, { encoding: 'utf-8' });
-	fs.writeFileSync(`${safe(projectName)}/tsconfig.json`, tsconfig, { encoding: 'utf-8' });
-
-	if (['basic', 'web', 'cli'].includes(projectType)) {
-		fs.mkdirSync(`${safe(projectName)}/src`);
-		fs.writeFileSync(`${safe(projectName)}/src/index.ts`, '', { encoding: 'utf-8' });
+	const samplesPath = path.join(__dirname, '..', `./samples/${projectType}`);
+	samplesWalker(path.join(__dirname, '..', './samples/common'), projectName);
+	if (fs.existsSync(samplesPath)) {
+		samplesWalker(samplesPath, projectName);
 	}
-
-	if (projectType === 'web') {
-		fs.writeFileSync(`${safe(projectName)}/src/index.html`, indexHtml(projectName), { encoding: 'utf-8' });
-	}
-
-	if (projectType === 'cdk') {
-		fs.mkdirSync(`${safe(projectName)}/bin`);
-		fs.mkdirSync(`${safe(projectName)}/lib`);
-		fs.writeFileSync(`${safe(projectName)}/cdk.json`, cdkJson(projectName), { encoding: 'utf-8' });
-		fs.writeFileSync(`${safe(projectName)}/bin/${safe(projectName)}.ts`, cdkBin(projectName), { encoding: 'utf-8' });
-		fs.writeFileSync(`${safe(projectName)}/lib/main.ts`, cdkLib(projectName), { encoding: 'utf-8' });
-	}
-
-	fs.mkdirSync(`${safe(projectName)}/@types`);
-	fs.writeFileSync(`${safe(projectName)}/@types/index.d.ts`, '', { encoding: 'utf-8' });
 
 	filesSignale.success('Creating files \n');
 };

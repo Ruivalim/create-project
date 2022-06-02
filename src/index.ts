@@ -2,14 +2,14 @@
 
 import prompts from 'prompts';
 import fs from 'fs';
-import { createDir, createFiles, initProject, installDependencies, postInstall } from './functions';
+import { createDir, initProject, installDependencies, moveSamples, postInstall } from './functions';
 
 (async () => {
 	const response = await prompts([
 		{
 			type: 'text',
 			name: 'projectName',
-			message: 'What the name of the project?',
+			message: 'What is the name of the project?',
 			validate: value => (fs.existsSync(value) ? 'This folder is already been used' : true),
 		},
 		{
@@ -41,7 +41,7 @@ import { createDir, createFiles, initProject, installDependencies, postInstall }
 
 	installDependencies(response.projectName, response.projectType, response.packageManager as packageManager);
 
-	createFiles(response.projectName, response.projectType);
+	moveSamples(response.projectName, response.projectType);
 
 	postInstall(response.projectName);
 })();

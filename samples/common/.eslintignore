@@ -3,5 +3,3 @@
 .history/
 target/
 node_modules/
-app/templates/assets/js/qrcode.js
-samples/
