@@ -31,6 +31,7 @@ import { createDir, initProject, installDependencies, moveSamples, postInstall }
 				{ title: 'pnpm', value: 'pnpm' },
 				{ title: 'npm', value: 'npm' },
 				{ title: 'yarn', value: 'yarn' },
+				{ title: 'bun', value: 'bun' },
 			],
 		},
 	]);

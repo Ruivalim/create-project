@@ -2,15 +2,23 @@ import { Signale } from 'signale';
 import fs from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
-import { exit } from 'process';
 import { dependenciesList, devDependenciesList } from './dependencies';
 
+const getDevelopmentSetting = (packageManger: packageManager): string => {
+	if (packageManger === 'bun') {
+		return '-d';
+	}
+
+	return '-D';
+};
+
 const install = (packageManager: packageManager, type: projectType, dev: boolean) => {
-	const command = packageManager === 'yarn' ? 'add' : 'install';
+	const command = ['yarn', 'bun'].includes(packageManager) ? 'add' : 'install';
+	const developmentSetting = dev ? getDevelopmentSetting(packageManager) : '';
 	const libs = dev ? devDependenciesList[type] : dependenciesList[type];
 
 	if (libs) {
-		return `${packageManager} ${command}${dev ? ' -D ' : ' '}${libs}`;
+		return `${packageManager} ${command} ${developmentSetting} ${libs}`;
 	}
 
 	return null;
